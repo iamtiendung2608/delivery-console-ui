@@ -1,6 +1,30 @@
+'use client';
+
 import Link from "next/link";
+import React, { useState } from 'react';
+import {handleLogin} from "@/app/auth/login/login";
+import {useRouter} from "next/navigation";
+import {LoginResponse} from "@/app/auth/login/types";
 
 export default function LoginPage() {
+    const [email, setEmail] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const currentRouter = useRouter();
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const response = await handleLogin({ email, password });
+        if (!response.ok) {
+            window.alert("Invalid username or password");
+            return;
+        } else {
+            const res: LoginResponse = await response.json();
+            localStorage.setItem('access_token', res.accessToken);
+            currentRouter.push("/home/order");
+        }
+    };
+
+
     return (
         <section className="bg-gray-50 dark:bg-gray-900">
             <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
@@ -21,7 +45,7 @@ export default function LoginPage() {
                         <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
                             Sign in to your account
                         </h1>
-                        <form className="space-y-4 md:space-y-6" action="#">
+                        <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
                             <div>
                                 <label
                                     htmlFor="email"
@@ -36,6 +60,8 @@ export default function LoginPage() {
                                     className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     placeholder="name@company.com"
                                     required
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                 />
                             </div>
                             <div>
@@ -52,6 +78,8 @@ export default function LoginPage() {
                                     placeholder="••••••••"
                                     className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     required
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                 />
                             </div>
                             <div className="flex items-center justify-between">
